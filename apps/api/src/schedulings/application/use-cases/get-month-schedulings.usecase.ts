@@ -6,7 +6,7 @@ import {
 import type {
   MonthSchedulingsResponseDto,
   SchedulingDto,
-} from '../dtos/month-schedulings.dto'
+} from '../../presentation/dtos/month-schedulings.dto'
 import { Scheduling } from '../../domain/entities/scheduling.entity'
 import { SlotService } from '../services/slot.service'
 

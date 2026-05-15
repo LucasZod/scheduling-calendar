@@ -5,8 +5,8 @@ import {
   SCHEDULING_REPOSITORY,
   type SchedulingRepository,
 } from '../../domain/ports/scheduling.repository'
-import { CreateSchedulingDto } from '../dtos/create-scheduling.dto'
-import type { SchedulingDto } from '../dtos/month-schedulings.dto'
+import { CreateSchedulingDto } from '../../presentation/dtos/create-scheduling.dto'
+import type { SchedulingDto } from '../../presentation/dtos/month-schedulings.dto'
 import { SlotService } from '../services/slot.service'
 
 @Injectable()

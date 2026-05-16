@@ -2,10 +2,7 @@ import { Inject, Injectable } from '@nestjs/common'
 import { and, gt, gte, lt, lte } from 'drizzle-orm'
 import { Scheduling } from '../../domain/entities/scheduling.entity'
 import { SchedulingRepository } from '../../domain/ports/scheduling.repository'
-import {
-  DATABASE_CONNECTION,
-  type DatabaseConnection,
-} from '../../../database/database.provider'
+import { DATABASE_CONNECTION, type DatabaseConnection } from '../../../database/database.provider'
 import { schedulings } from './schema'
 
 @Injectable()
@@ -29,20 +26,11 @@ export class DrizzleSchedulingRepository implements SchedulingRepository {
     const rows = await this.db
       .select()
       .from(schedulings)
-      .where(
-        and(gte(schedulings.startAt, rangeStart), lte(schedulings.startAt, rangeEnd))
-      )
+      .where(and(gte(schedulings.startAt, rangeStart), lte(schedulings.startAt, rangeEnd)))
 
     return rows.map(
       (row) =>
-        new Scheduling(
-          row.id,
-          row.startAt,
-          row.endAt,
-          row.clientName,
-          row.reason,
-          row.createdAt
-        )
+        new Scheduling(row.id, row.startAt, row.endAt, row.clientName, row.reason, row.createdAt)
     )
   }
 

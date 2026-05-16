@@ -31,9 +31,7 @@ export class SlotService {
 
   private readConfig(): { startMinutes: number; endMinutes: number; interval: number } {
     return {
-      startMinutes: this.hhmmToMinutes(
-        this.config.getOrThrow('SLOT_START', { infer: true })
-      ),
+      startMinutes: this.hhmmToMinutes(this.config.getOrThrow('SLOT_START', { infer: true })),
       endMinutes: this.hhmmToMinutes(this.config.getOrThrow('SLOT_END', { infer: true })),
       interval: this.config.getOrThrow('SLOT_INTERVAL_MINUTES', { infer: true }),
     }

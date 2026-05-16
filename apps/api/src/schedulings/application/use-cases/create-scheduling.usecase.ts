@@ -38,23 +38,18 @@ export class CreateSchedulingUseCase {
 
   private parseStartAt(raw: string): Date {
     const parsed = parseISO(raw)
-    if (!isValid(parsed)) {
-      throw new BadRequestException('startAt inválido.')
-    }
+    if (!isValid(parsed)) throw new BadRequestException('startAt inválido.')
     return parsed
   }
 
   private ensureSlotIsAllowed(startAt: Date): void {
-    if (!this.slots.isAlignedToGrid(startAt)) {
+    if (!this.slots.isAlignedToGrid(startAt))
       throw new BadRequestException('Horário não permitido.')
-    }
   }
 
   private async ensureSlotIsAvailable(startAt: Date, endAt: Date): Promise<void> {
     const overlapping = await this.repository.existsOverlapping(startAt, endAt)
-    if (overlapping) {
-      throw new BadRequestException('Este horário já está agendado.')
-    }
+    if (overlapping) throw new BadRequestException('Este horário já está agendado.')
   }
 
   private toDto(scheduling: Scheduling): SchedulingDto {

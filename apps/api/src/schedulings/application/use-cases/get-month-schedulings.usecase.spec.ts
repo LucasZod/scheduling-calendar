@@ -1,5 +1,6 @@
 import { BadRequestException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import { endOfMonth, startOfMonth } from 'date-fns'
 import { Scheduling } from '../../domain/entities/scheduling.entity'
 import type { SchedulingRepository } from '../../domain/ports/scheduling.repository'
 import { SlotService } from '../services/slot.service'
@@ -26,8 +27,8 @@ const buildConfig = (
 const buildUseCase = (configOverrides: Partial<Record<keyof Env, unknown>> = {}) => {
   const repository: jest.Mocked<SchedulingRepository> = {
     save: jest.fn(),
-    findByMonth: jest.fn().mockResolvedValue([]),
-    existsByDateAndTime: jest.fn(),
+    findInRange: jest.fn().mockResolvedValue([]),
+    existsOverlapping: jest.fn(),
   }
   const useCase = new GetMonthSchedulingsUseCase(
     repository,
@@ -45,21 +46,34 @@ describe('GetMonthSchedulingsUseCase', () => {
     expect(result.allowedSlots).toEqual(['08:00', '09:00', '10:00'])
   })
 
-  it('deve retornar agendamentos do mês mapeados para SchedulingDto', async () => {
+  it('deve consultar o repositório com o intervalo [startOfMonth, endOfMonth]', async () => {
     const { repository, useCase } = buildUseCase()
-    const createdAt = new Date('2025-05-15T12:00:00.000Z')
-    repository.findByMonth.mockResolvedValue([
-      new Scheduling('id-1', '2025-05-15', '09:00', 'Maria', 'consulta', createdAt),
+
+    await useCase.execute('10/05/2025')
+
+    expect(repository.findInRange).toHaveBeenCalledTimes(1)
+    const [rangeStart, rangeEnd] = repository.findInRange.mock.calls[0]
+    const reference = new Date(2025, 4, 10)
+    expect(rangeStart.getTime()).toBe(startOfMonth(reference).getTime())
+    expect(rangeEnd.getTime()).toBe(endOfMonth(reference).getTime())
+  })
+
+  it('deve mapear Scheduling do domínio para SchedulingDto', async () => {
+    const { repository, useCase } = buildUseCase()
+    const startAt = new Date('2025-05-15T09:00:00')
+    const endAt = new Date('2025-05-15T10:00:00')
+    const createdAt = new Date('2025-05-10T12:00:00')
+    repository.findInRange.mockResolvedValue([
+      new Scheduling('id-1', startAt, endAt, 'Maria', 'consulta', createdAt),
     ])
 
     const result = await useCase.execute('01/05/2025')
 
-    expect(repository.findByMonth).toHaveBeenCalledWith(2025, 5)
     expect(result.schedulings).toEqual([
       {
         id: 'id-1',
-        date: '2025-05-15',
-        time: '09:00',
+        startAt: startAt.toISOString(),
+        endAt: endAt.toISOString(),
         clientName: 'Maria',
         reason: 'consulta',
         createdAt: createdAt.toISOString(),
@@ -72,7 +86,7 @@ describe('GetMonthSchedulingsUseCase', () => {
 
     await expect(useCase.execute('2025-05-01')).rejects.toBeInstanceOf(BadRequestException)
     await expect(useCase.execute('foo/bar/baz')).rejects.toBeInstanceOf(BadRequestException)
-    await expect(useCase.execute('01/13/2025')).rejects.toBeInstanceOf(BadRequestException)
+    await expect(useCase.execute('32/05/2025')).rejects.toBeInstanceOf(BadRequestException)
     await expect(useCase.execute('')).rejects.toBeInstanceOf(BadRequestException)
   })
 })

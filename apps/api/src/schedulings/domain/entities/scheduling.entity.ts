@@ -1,7 +1,7 @@
 export interface SchedulingProps {
   id: string
-  date: string
-  time: string
+  startAt: Date
+  endAt: Date
   clientName: string
   reason: string
 }
@@ -9,8 +9,8 @@ export interface SchedulingProps {
 export class Scheduling {
   constructor(
     readonly id: string,
-    readonly date: string,
-    readonly time: string,
+    readonly startAt: Date,
+    readonly endAt: Date,
     readonly clientName: string,
     readonly reason: string,
     readonly createdAt: Date
@@ -19,8 +19,8 @@ export class Scheduling {
   static create(props: SchedulingProps): Scheduling {
     return new Scheduling(
       props.id,
-      props.date,
-      props.time,
+      props.startAt,
+      props.endAt,
       props.clientName,
       props.reason,
       new Date()

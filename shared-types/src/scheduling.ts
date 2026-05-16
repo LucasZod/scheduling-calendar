@@ -1,7 +1,7 @@
 export interface SchedulingDto {
   id: string
-  date: string
-  time: string
+  startAt: string
+  endAt: string
   clientName: string
   reason: string
   createdAt: string
@@ -13,8 +13,7 @@ export interface MonthSchedulingsResponseDto {
 }
 
 export interface CreateSchedulingDto {
-  date: string
-  time: string
+  startAt: string
   clientName: string
   reason: string
 }
